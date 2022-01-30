@@ -29,6 +29,15 @@ contract Ballot {
     mapping(address => Voter) public voters;
 
     Proposal[] public proposals;
+    bytes32[2]  public proposalnames ;
+    address payable [] unRegistered_Voters;
+
+    function ContractInfo() public view returns(bytes32[2] memory,address,address payable [] memory){
+        return (proposalnames,chairperson,unRegistered_Voters);
+    }
+    function unRegistered_Users(address payable A ) public {
+       unRegistered_Voters.push (A);
+    }
     
     modifier validStage(Stage reqStage){
         require (stage == reqStage);
@@ -43,10 +52,12 @@ contract Ballot {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
+
         for (uint i = 0; i < proposalNames.length; i++) {
             // 'Proposal({...})' creates a temporary
             // Proposal object and 'proposals.push(...)'
             // appends it to the end of 'proposals'.
+            proposalnames[i] = proposalNames[i];
             proposals.push(Proposal({
                 name: proposalNames[i],
                 voteCount: 0
@@ -60,7 +71,7 @@ contract Ballot {
      * @dev Give 'voter' the right to vote on this ballot. May only be called by 'chairperson'.
      * @param voter address of voter
      */
-    function giveRightToVote(address voter) public  validStage(Stage.Reg) {
+    function giveRightToVote(address voter,uint index) public  validStage(Stage.Reg) {
         
         require(
             msg.sender == chairperson,
@@ -77,6 +88,8 @@ contract Ballot {
         else {
         voters[voter].weight = 1;
         voters[voter].voted = false ;
+        unRegistered_Voters [index] = unRegistered_Voters[unRegistered_Voters.length - 1];
+        unRegistered_Voters.pop();
         }
     }
 
